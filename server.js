@@ -187,3 +187,11 @@ app.get("/users", (req, res) => {
 //Sorting: /users?sort=name
 const sort = req.query.sort;
 app.listen(PORT, () => console.log("server is running.."));
+// Asynchronous
+fs.readFile("data.txt", "utf8", (err, data) => {
+  console.log(data);
+});
+
+// Synchronous
+const data = fs.readFileSync("data.txt", "utf8");
+console.log(data);

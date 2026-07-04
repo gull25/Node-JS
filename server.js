@@ -70,128 +70,256 @@
 // app.listen(PORT, () => {
 //   console.log(`App listening on port 5000!..${PORT}`);
 // });
-const User = require("./models/User");
+
 const express = require("express");
 const mongoose = require("mongoose");
+const User = require("./models/User");
+
 const app = express();
 const PORT = 5000;
 
-//Middleware:
+// Middleware
 app.use(express.json());
 
-//Connect to MongoDB:
+// MongoDB Connection
 mongoose
   .connect("mongodb://127.0.0.1:27017/myDatabase")
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
-//Create(POST)
+/* ===========================
+        CREATE USER
+=========================== */
+
 app.post("/users", async (req, res) => {
-  const { name } = req.body;
-  const user = new User({
-    name,
-  });
-  await user.save();
-  res.status(201).json(user);
+  try {
+    const { name } = req.body;
+    const user = new User({
+      name,
+    });
+    await user.save();
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-//Read all
+/* ===========================
+   READ ALL / FILTER / SORT /
+      PAGINATION
+=========================== */
+
 app.get("/users", async (req, res) => {
-  const users = await User.find();
-  res.json(users);
+  try {
+    const { id, name, page = 1, limit = 5, sort = "name" } = req.query;
+
+    // Search by ID
+    if (id) {
+      const user = await User.findById(id);
+
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+      return res.json(user);
+    }
+
+    // Filtering
+    const filter = {};// means find everything
+    if (name) {
+      filter.name = name;
+    }
+    const users = await User.find(filter)
+    // ?sort=name for Ascending and ?sort=-name for descending
+      .sort(sort) 
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
 });
 
-//Read One:
+/* ===========================
+      READ ONE BY PARAM
+=========================== */
+
 app.get("/users/:id", async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (!user) {
-    return res.status(404).json({
-      message: "User not found",
+  console.log("tis is data 2");
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
     });
   }
-  res.json(user);
 });
 
-//Update One:
+/* ===========================
+     UPDATE ONE BY PARAM
+=========================== */
+
 app.put("/users/:id", async (req, res) => {
-  const { name } = req.body;
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    { name },
-    { new: true },
-  );
-  if (!user) {
-    return res.status(404).json({
-      message: "User not found",
+  try {
+    const { name } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { name },
+      { new: true },
+    );
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
     });
   }
-  res.json(user);
 });
 
-//Delete one
-app.delete("/users/:id", async (req, res) => {
-  const user = await User.findByIdAndDelete(req.params.id);
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
+/* ===========================
+ UPDATE BY QUERY
+ Example:
+/users/update?id=...
+/users/update?name=Ali
+=========================== */
+
+app.put("/users/update", async (req, res) => {
+  try {
+    const { id, name: oldName } = req.query;
+    const { name } = req.body;
+    // Update One by ID
+    if (id) {
+      const user = await User.findByIdAndUpdate(id, { name }, { new: true });
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+      return res.json(user);
+    }
+
+    // Update Many by Name
+    if (oldName) {
+      const result = await User.updateMany({ name: oldName }, { name });
+      return res.json(result);
+    }
+    res.status(400).json({
+      message: "Provide id or name in query",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
-  res.json({
-    message: "User deleted",
-  });
 });
 
-//Update all;
+/* ===========================
+      UPDATE ALL USERS
+=========================== */
+
 app.put("/users", async (req, res) => {
-  const { name } = req.body;
-  await User.updateMany({}, { name });
-  res.json({
-    message: "All users updated",
-  });
+  try {
+    const { name } = req.body;
+    const result = await User.updateMany({}, { name });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
 });
 
-//Delete All:
+/* ===========================
+    DELETE ONE BY PARAM
+=========================== */
+
+app.delete("/users/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    res.json({
+      message: "User deleted",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+/* ===========================
+ DELETE BY QUERY
+ Example:
+/users/delete?id=...
+/users/delete?name=Ali
+=========================== */
+
+app.delete("/users/delete", async (req, res) => {
+  try {
+    const { id, name } = req.query;
+    if (id) {
+      const user = await User.findByIdAndDelete(id);
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+      return res.json({
+        message: "User deleted",
+      });
+    }
+    if (name) {
+      const result = await User.deleteMany({
+        name,
+      });
+      return res.json(result);
+    }
+    res.status(400).json({
+      message: "Provide id or name",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+/* ===========================
+      DELETE ALL USERS
+=========================== */
+
 app.delete("/users", async (req, res) => {
-  await User.deleteMany({});
-  res.json({
-    message: "All users deleted",
-  });
+  try {
+    const result = await User.deleteMany({});
+    res.json({
+      message: "All users deleted",
+      result,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
 });
 
-//Search by User Name: /users?name=Ali
-app.get("/users", (req, res) => {
-  const { name } = req.query;
-  const filteredUsers = users.filter(
-    (u) => u.name.toLowerCase() === name.toLowerCase(),
-  );
-  res.json(filteredUsers);
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-//Search by ID: /users?id=2
-//For multiple queries: /users?name=Ali&id=1
-app.get("/users", (req, res) => {
-  const id = Number(req.query.id);
-  const user = users.find((u) => u.id === id);
-  res.json(user);
-});
-
-//Pagination:Suppose there are 100 users.
-// Instead of sending all users, send only 5.
-///users?page=2&limit=5
-app.get("/users", (req, res) => {
-  const page = Number(req.query.page);
-  const limit = Number(req.query.limit);
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  res.json(users.slice(start, end));
-});
-
-//Sorting: /users?sort=name
-const sort = req.query.sort;
-app.listen(PORT, () => console.log("server is running.."));
-// Asynchronous
-fs.readFile("data.txt", "utf8", (err, data) => {
-  console.log(data);
-});
-
-// Synchronous
-const data = fs.readFileSync("data.txt", "utf8");
-console.log(data);

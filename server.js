@@ -104,19 +104,25 @@ app.post("/users", async (req, res) => {
   }
 });
 
-/* ===========================
-   READ ALL / FILTER / SORT /
-      PAGINATION
-=========================== */
-
+//Read All Users:
 app.get("/users", async (req, res) => {
   try {
-    const { id, name, page = 1, limit = 5, sort = "name" } = req.query;
+    const users = await User.find();
 
-    // Search by ID
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+//Read/Search user by ID:
+app.get("/users", async (req, res) => {
+  console.log("This is first");
+  try {
+    const { id } = req.query;
     if (id) {
       const user = await User.findById(id);
-
       if (!user) {
         return res.status(404).json({
           message: "User not found",
@@ -124,17 +130,60 @@ app.get("/users", async (req, res) => {
       }
       return res.json(user);
     }
-
-    // Filtering
-    const filter = {};// means find everything
-    if (name) {
-      filter.name = name;
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+//Read/Search by name:
+app.get("/users", async (req, res) => {
+  try {
+    const { id, name } = req.query;
+    if (id) {
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+      return res.json(user);
     }
-    const users = await User.find(filter)
-    // ?sort=name for Ascending and ?sort=-name for descending
-      .sort(sort) 
-      .skip((Number(page) - 1) * Number(limit))
-      .limit(Number(limit));
+    if (name) {
+      const users = await User.find({ name: name });
+      return res.json(users);
+    }
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+//Sorting: We can do both ascending and descending as well.
+app.get("/users", async (req, res) => {
+  try {
+    const { sort } = req.query;
+    const users = await User.find().sort(sort);
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+//Pagination:
+app.get("/users", async (req, res) => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const users = await User.find()
+      .skip((page - 1) * limit)
+      .limit(limit);
     res.json(users);
   } catch (err) {
     res.status(500).json({
@@ -148,7 +197,6 @@ app.get("/users", async (req, res) => {
 =========================== */
 
 app.get("/users/:id", async (req, res) => {
-  console.log("tis is data 2");
   try {
     const user = await User.findById(req.params.id);
     if (!user) {

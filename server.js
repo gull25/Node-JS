@@ -74,16 +74,17 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const User = require("./models/User");
+require("dotenv").config(); // Load variables from .env
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
 
 // MongoDB Connection
 mongoose
-  .connect("mongodb://127.0.0.1:27017/myDatabase")
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 

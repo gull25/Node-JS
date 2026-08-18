@@ -88,17 +88,17 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
-// //Create User:
-// app.post("/users", async (req, res) => {
-//   try {
-//     const { name } = req.body;
-//     const user = new User({ name });
-//     await user.save();
-//     res.status(201).json(user);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
+// Create User:
+app.post("/users", async (req, res) => {
+  try {
+    const { name } = req.body;
+    const user = new User({ name });
+    await user.save();
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // //Read all users:
 // app.get("/users", async (req, res) => {

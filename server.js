@@ -100,32 +100,32 @@ app.post("/users", async (req, res) => {
   }
 });
 
-// //Read all users:
-// app.get("/users", async (req, res) => {
-//   console.log("all get");
+// Read all users:
+app.get("/users/all", async (req, res) => {
+  console.log("Fetching all users");
 
-//   try {
-//     const users = await User.find();
-//     res.json(users);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
-// //Read one user:
-// app.get("/users2/:id", async (req, res) => {
-//   try {
-//     const user = await User.findById(req.params.id);
-//     if (!user) {
-//       return res.status(404).json({
-//         message: "User not found",
-//       });
-//     }
-//     res.json(user);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
+// Read one user by ID parameter:
+app.get("/users/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // //Update one user:
 // app.put("/users/:id", async (req, res) => {

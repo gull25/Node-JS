@@ -118,6 +118,26 @@ app.get("/users/paginate", async (req, res) => {
   }
 });
 
+// Count users:
+app.get("/users/stats/count", async (req, res) => {
+  try {
+    const count = await User.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Delete all users:
+app.delete("/users/all", async (req, res) => {
+  try {
+    const result = await User.deleteMany();
+    res.json({ message: `${result.deletedCount} users deleted` });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -164,6 +164,17 @@ app.delete("/users/:id", async (req, res) => {
   }
 });
 
+// Get recent users (latest 5):
+app.get("/users/stats/recent", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit) || 5;
+    const users = await User.find().sort({ _id: -1 }).limit(limit);
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

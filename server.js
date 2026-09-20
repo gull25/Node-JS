@@ -175,19 +175,6 @@ app.get("/users/stats/recent", async (req, res) => {
   }
 });
 
-// Create multiple users in bulk:
-app.post("/users/bulk", async (req, res) => {
-  try {
-    const users = req.body; // Expecting an array of user objects
-    if (!Array.isArray(users) || users.length === 0) {
-      return res.status(400).json({ message: "Request body must be a non-empty array of users." });
-    }
-    const result = await User.insertMany(users);
-    res.status(201).json(result);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
 
 // Start Server
 app.listen(PORT, () => {

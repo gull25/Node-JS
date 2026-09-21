@@ -176,6 +176,21 @@ app.get("/users/stats/recent", async (req, res) => {
 });
 
 
+// Advanced search by multiple fields:
+app.get("/users/search/advanced", async (req, res) => {
+  try {
+    // Build a dynamic query object based on provided query parameters
+    const query = {};
+    if (req.query.name) query.name = new RegExp(req.query.name, 'i');
+    if (req.query.email) query.email = new RegExp(req.query.email, 'i');
+    
+    const users = await User.find(query);
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

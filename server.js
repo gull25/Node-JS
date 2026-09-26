@@ -176,6 +176,23 @@ app.get("/users/stats/recent", async (req, res) => {
 });
 
 
+// Search users by partial name (Fuzzy Search):
+app.get("/users/search/fuzzy", async (req, res) => {
+  try {
+    const { name } = req.query;
+    if (!name) {
+      return res.status(400).json({ message: "Name query parameter is required" });
+    }
+    const users = await User.find({
+      name: { $regex: name, $options: "i" },
+    });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

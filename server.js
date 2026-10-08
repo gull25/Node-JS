@@ -118,6 +118,20 @@ app.get("/users/paginate", async (req, res) => {
   }
 });
 
+// Pagination (Copy):
+app.get("/users/paginate", async (req, res) => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const users = await User.find()
+      .skip((page - 1) * limit)
+      .limit(limit);
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Count users:
 app.get("/users/stats/count", async (req, res) => {
   try {

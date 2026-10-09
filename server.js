@@ -165,6 +165,19 @@ app.patch("/users/:id", async (req, res) => {
   }
 });
 
+// Update one user by ID parameter (Copy):
+app.patch("/users/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Delete one user by ID parameter:
 app.delete("/users/:id", async (req, res) => {
   try {

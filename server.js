@@ -89,6 +89,24 @@ app.delete("/users", async (req, res) => {
   }
 });
 
+// Delete one user (Copy):
+app.delete("/users", async (req, res) => {
+  try {
+    const { id } = req.query;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    res.json({
+      message: "User deleted",
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Search by name:
 app.get("/users", async (req, res) => {
   try {

@@ -239,6 +239,11 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date() });
 });
 
+// Health Check Endpoint (Copy)
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK", timestamp: new Date() });
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -122,6 +122,21 @@ app.get("/users", async (req, res) => {
   }
 });
 
+// Search by name (Copy):
+app.get("/users", async (req, res) => {
+  try {
+    const { name } = req.query;
+    const users = await User.find({
+      name: name,
+    });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
 // Pagination:
 app.get("/users/paginate", async (req, res) => {
   try {

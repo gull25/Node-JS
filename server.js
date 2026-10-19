@@ -86,6 +86,23 @@ app.put("/users", async (req, res) => {
   }
 });
 
+// Update one user (Copy):
+app.put("/users", async (req, res) => {
+  try {
+    const { id } = req.query;
+    const { name } = req.body;
+    const user = await User.findByIdAndUpdate(id, { name }, { new: true });
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Delete one user:
 app.delete("/users", async (req, res) => {
   try {

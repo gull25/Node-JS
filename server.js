@@ -39,6 +39,18 @@ app.get("/users/all", async (req, res) => {
   }
 });
 
+// Read all users (Copy):
+app.get("/users/all", async (req, res) => {
+  console.log("Fetching all users");
+
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Read one user by ID parameter:
 app.get("/users/:id", async (req, res) => {
   try {

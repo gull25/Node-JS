@@ -51,6 +51,42 @@ app.get("/users/all", async (req, res) => {
   }
 });
 
+// Sort users by field and order (e.g., /users/sort?by=name&order=asc):
+app.get("/users/sort", async (req, res) => {
+  try {
+    const { by = "name", order = "asc", limit } = req.query;
+    const sortOrder = order.toLowerCase() === "desc" ? -1 : 1;
+
+    let query = User.find().sort({ [by]: sortOrder });
+    if (limit) {
+      query = query.limit(Number(limit));
+    }
+
+    const users = await query;
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Sort users by field and order (Copy):
+app.get("/users/sort", async (req, res) => {
+  try {
+    const { by = "name", order = "asc", limit } = req.query;
+    const sortOrder = order.toLowerCase() === "desc" ? -1 : 1;
+
+    let query = User.find().sort({ [by]: sortOrder });
+    if (limit) {
+      query = query.limit(Number(limit));
+    }
+
+    const users = await query;
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Read one user by ID parameter:
 app.get("/users/:id", async (req, res) => {
   try {

@@ -27,6 +27,34 @@ app.post("/users", async (req, res) => {
   }
 });
 
+// Bulk create users:
+app.post("/users/bulk", async (req, res) => {
+  try {
+    const userList = Array.isArray(req.body) ? req.body : req.body.users;
+    if (!Array.isArray(userList) || userList.length === 0) {
+      return res.status(400).json({ message: "Request body must be an array or contain a 'users' array" });
+    }
+    const createdUsers = await User.insertMany(userList);
+    res.status(201).json(createdUsers);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Bulk create users (Copy):
+app.post("/users/bulk", async (req, res) => {
+  try {
+    const userList = Array.isArray(req.body) ? req.body : req.body.users;
+    if (!Array.isArray(userList) || userList.length === 0) {
+      return res.status(400).json({ message: "Request body must be an array or contain a 'users' array" });
+    }
+    const createdUsers = await User.insertMany(userList);
+    res.status(201).json(createdUsers);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Read all users:
 app.get("/users/all", async (req, res) => {
   console.log("Fetching all users");
@@ -81,6 +109,38 @@ app.get("/users/sort", async (req, res) => {
     }
 
     const users = await query;
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Search users by partial name (case-insensitive regex, e.g. /users/search?q=john):
+app.get("/users/search", async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return res.status(400).json({ message: "Search query 'q' is required" });
+    }
+    const users = await User.find({
+      name: { $regex: q, $options: "i" },
+    });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Search users by partial name (Copy):
+app.get("/users/search", async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return res.status(400).json({ message: "Search query 'q' is required" });
+    }
+    const users = await User.find({
+      name: { $regex: q, $options: "i" },
+    });
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
